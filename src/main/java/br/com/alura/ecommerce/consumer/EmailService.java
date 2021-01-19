@@ -1,15 +1,23 @@
-package br.com.alura.ecommerce;
+package br.com.alura.ecommerce.consumer;
 
+import br.com.alura.ecommerce.model.Email;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.util.Map;
 
 public class EmailService {
 
     public static void main(String[] args) {
         var emailService = new EmailService();
-        var service = new KafkaService(EmailService.class.getSimpleName(),
+        try(var service = new KafkaService(EmailService.class.getSimpleName(),
                 "ECOMMERCE_SEND_EMAIL",
-                emailService::parse);
-        service.run();
+                emailService::parse,
+                String.class,
+                Map.of(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class))) {
+            service.run();
+        }
     }
 
     private void parse(ConsumerRecord<String, String> record) {
